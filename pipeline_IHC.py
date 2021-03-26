@@ -1,3 +1,11 @@
+"""@package pipeline_IHC
+All methods needed to load data to be passed to the NN.
+ 
+More details.
+"""
+
+
+
 # Images
 import os
 import PIL 
@@ -10,13 +18,14 @@ import skimage.draw
 
 
 def load_img(in_dir):
-    '''
+    """
     Load images and transform it to np.arrays to be inputed in the model
+    
     Parameters :
         in_dir -> directory containing the image files (str)
     Returned value :
         img_as_array -> list of images in in_dir represented as np.array of int (list of np.arrays)
-    ''' 
+    """ 
     
     # list of image paths
     img_paths = sorted(
@@ -56,14 +65,14 @@ def load_img(in_dir):
 
 
 def xml_to_vertices(xml, region_type = '0'):
-    '''
+    """
     Returns the list of coordinates of the vertices of each regions 
     Parameters :
         xml -> parsed xml file
         region_type -> extract only positive '0' or negative regions '1'(str)
     Returned value :
         V_coord -> list of coordinates (dict) of all vertices in each region (2D array of dict)
-    '''
+    """
     
     # extract positive regions
     regions = []
@@ -120,13 +129,13 @@ def vertices_to_mask(img_shape, ds_rate, V_coord):
     return mask
 
 def load_annot(in_dir):
-    '''
+    """
     Load annotation files and transform it to mask arrays to be inputed in the model
     Parameters :
         in_dir -> directory containing the annotation files (str)
     Returned value :
         mask_array -> list of images in in_dir represented as np.array of int (list of np.arrays)
-    ''' 
+    """ 
     
     # list of annotations paths
     annot_paths = sorted(
