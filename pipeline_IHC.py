@@ -24,7 +24,7 @@ def load_img(in_dir):
     Parameters :
         in_dir -> directory containing the image files (str)
     Returned value :
-        img_as_array -> list of images in in_dir represented as np.array of int (list of np.arrays)
+        img_as_array -> dict of images in in_dir represented as np.array of int, indexed by image's name (str)
     """ 
     
     # list of image paths
@@ -37,28 +37,31 @@ def load_img(in_dir):
     )
     
     # path -> OpenSlide image
-    OpSl_img = [] # list of OpenSlide images
+    OpSl_img = {} # dict of OpenSlide images {name : OpSL image}
     for path in img_paths:
         temp_OpSl_img = openslide.OpenSlide(path) # open whole-slide image
-        OpSl_img.append(temp_OpSl_img)
+        temp_img_name = path.split('/')[-1].split('.')[0] # retrives the image's name
+        OpSl_img[temp_img_name] = temp_OpSl_img
     
     # OpenSlide image -> PIL image
     # as we can't load full images we take an arbitrary level to extract
-    PIL_img = []
+    PIL_img = {}
     location = (0,0)
     level = 5
-    for img in OpSl_img:
+    for img_name in OpSl_img:
+        img = OpSl_img[img_name]
         size = img.level_dimensions[level]
         temp_PIL_img = img.read_region(location, level, size)
         #temp_PIL_img.show()
         img.close() # close image
-        PIL_img.append(temp_PIL_img)
+        PIL_img[img_name] = temp_PIL_img
         
     # PIL image -> np.array
-    img_as_array = [] # returned value, list of np.arrays
-    for Pimg in PIL_img:
+    img_as_array = {} # returned value, list of np.arrays
+    for img_name in PIL_img:
+        Pimg = PIL_img[img_name]
         temp_array = np.array(Pimg)
-        img_as_array.append(temp_array)
+        img_as_array[img_name] = temp_array
         
     return img_as_array
 
@@ -128,13 +131,13 @@ def vertices_to_mask(img_shape, ds_rate, V_coord):
         
     return mask
 
-def load_annot(in_dir):
+def load_annot(in_dir, img_dict):
     """
     Load annotation files and transform it to mask arrays to be inputed in the model
     Parameters :
         in_dir -> directory containing the annotation files (str)
     Returned value :
-        mask_array -> list of images in in_dir represented as np.array of int (list of np.arrays)
+        mask_array -> dict of images in in_dir represented as np.array of int, indexed by image's name (str)
     """ 
     
     # list of annotations paths
@@ -143,26 +146,33 @@ def load_annot(in_dir):
             os.path.join(in_dir, fname) # join directory name with file name
             for fname in os.listdir(in_dir)
             if fname.endswith(".annotations") # for annotations files of the directory
+            if fname.split('.')[0] in img_dict # load only the annotations corresponding to loaded img
         ]
     )
+    #print("paths", annot_paths)
     
     # path -> xml
-    annot_xml = []
+    annot_xml = {}
     for path in annot_paths:
         temp_xml = minidom.parse(path) # open xml
-        annot_xml.append(temp_xml)
+        temp_img_name = path.split('/')[-1].split('.')[0] # retrives the corresponding image's name
+        annot_xml[temp_img_name] = temp_xml
+    #print("xml", annot_xml)
         
     # xml -> list of vertices
-    annot_coords = []
-    for xml in annot_xml:
+    annot_coords = {}
+    for img_name in annot_xml:
+        xml = annot_xml[img_name]
         temp_coords = xml_to_vertices(xml, '0')
-        annot_coords.append(temp_coords)
+        annot_coords[img_name] = temp_coords
+    #print("coords", annot_coords)
         
     # comment associer annot files w/ img ?
     # list of vertices -> mask array
-    masks = []
-    for coords in annot_coords:
+    masks = {}
+    for img_name in annot_coords:
+        coords = annot_coords[img_name]
         temp_mask = vertices_to_mask((1008, 840), 64, coords) # taille et ds_rate random
-        masks.append(temp_mask)
+        masks[img_name] = temp_mask
     
     return masks
