@@ -172,7 +172,8 @@ def load_annot(in_dir, img_dict):
     masks = {}
     for img_name in annot_coords:
         coords = annot_coords[img_name]
-        temp_mask = vertices_to_mask((1008, 840), 64, coords) # taille et ds_rate random
+        img_shape = img_dict[img_name].shape
+        temp_mask = vertices_to_mask(img_shape, 64, coords) # taille et ds_rate random
         masks[img_name] = temp_mask
     
     return masks
