@@ -8,10 +8,11 @@ class Test_TrainingSet_improt(unittest.TestCase):
 	def test_load_img(self):
 		# load 2 images
 		loaded = pipe.load_img("./test_data/data/")
+		name = list(loaded.keys())[0]
 		self.assertEqual(len(loaded), 2) # 2 images loaded
-		self.assertGreater(len(loaded[0]), 1000) 
-		self.assertGreater(len(loaded[0][0]), 1000)
-		self.assertEqual(len(loaded[0][0][0]), 4) # RGBA images 
+		self.assertGreater(len(loaded[name]), 1000) 
+		self.assertGreater(len(loaded[name][0]), 1000)
+		self.assertEqual(len(loaded[name][0][0]), 4) # RGBA images 
 
 		# repository vide
 		self.assertEqual(len(pipe.load_img("./test_data/nodata/")), 0)
