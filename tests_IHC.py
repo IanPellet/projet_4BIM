@@ -1,6 +1,8 @@
 import unittest
 import pipeline_IHC as pipe
 from xml.dom import minidom
+import random
+from datetime import datetime
 
 
 class Test_TrainingSet_improt(unittest.TestCase):
@@ -32,6 +34,20 @@ class Test_TrainingSet_improt(unittest.TestCase):
 		self.assertListEqual(Vcoords, vert_dict)
 		self.assertListEqual(Vcoords[0], vert_dict[0])
 		self.assertDictEqual(Vcoords[0][0], vert_dict[0][0])
+
+	def test_load_annot(self):
+		random.seed(datetime.now())
+		input_dir = "./data/"
+		# load images
+		loaded = pipe.load_img(input_dir)
+		rand_name = list(loaded.keys())[random.randint(0, len(loaded))] # random image name
+		loaded_masks = pipe.load_annot(input_dir, loaded)
+
+		self.assertEqual(len(loaded), len(loaded_masks)) # same nbr of img and masks
+		for img in loaded_masks:
+			self.assertEqual(loaded[img].shape, loaded_masks[img].shape) # mask and img of the same shape
+
+
 
 
 if __name__ == '__main__':
