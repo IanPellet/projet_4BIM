@@ -47,12 +47,13 @@ def load_img(in_dir):
     # as we can't load full images we take an arbitrary level to extract
     PIL_img = {}
     location = (0,0)
-    level = 5
+    level = 7
     for img_name in OpSl_img:
         img = OpSl_img[img_name]
         size = img.level_dimensions[level]
         temp_PIL_img = img.read_region(location, level, size)
-        #temp_PIL_img.show()
+        temp_PIL_img.save('img.png')
+        temp_PIL_img.show()
         img.close() # close image
         PIL_img[img_name] = temp_PIL_img
         

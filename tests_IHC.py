@@ -36,7 +36,6 @@ class Test_TrainingSet_improt(unittest.TestCase):
 		self.assertDictEqual(Vcoords[0][0], vert_dict[0][0])
 
 	def test_load_annot(self):
-		random.seed(datetime.now())
 		input_dir = "./data/"
 		# load images
 		loaded = pipe.load_img(input_dir)
@@ -51,4 +50,5 @@ class Test_TrainingSet_improt(unittest.TestCase):
 
 
 if __name__ == '__main__':
+	random.seed(datetime.now())
 	unittest.main()
