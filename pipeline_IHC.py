@@ -128,6 +128,7 @@ def vertices_to_mask(img_shape, ds_rate, V_coord):
         poly = np.transpose(polygons[p])
 
         for i in range(len(poly)):
+            #print(poly[i][0], poly[i][1])
             mask[(poly[i][0], poly[i][1])] = 0
         
     return mask
