@@ -17,7 +17,7 @@ from xml.dom import minidom
 import skimage.draw
 
 
-def load_img(in_dir):
+def load_img(in_dir, one = False):
     """
     Load images and transform it to np.arrays to be inputed in the model
     
@@ -26,15 +26,17 @@ def load_img(in_dir):
     Returned value :
         img_as_array -> dict of images in in_dir represented as np.array of int, indexed by image's name (str)
     """ 
-    
-    # list of image paths
-    img_paths = sorted(
-        [
-            os.path.join(in_dir, fname) # join directory name with file name
-            for fname in os.listdir(in_dir)
-            if fname.endswith(".ndpi") # for ndpi files of the directory
-        ]
-    )
+    if one :
+        img_paths = [in_dir]
+    else:
+        # list of image paths
+        img_paths = sorted(
+            [
+                os.path.join(in_dir, fname) # join directory name with file name
+                for fname in os.listdir(in_dir)
+                if fname.endswith(".ndpi") # for ndpi files of the directory
+            ]
+        )
     
     # path -> OpenSlide image
     OpSl_img = {} # dict of OpenSlide images {name : OpSL image}
@@ -47,13 +49,13 @@ def load_img(in_dir):
     # as we can't load full images we take an arbitrary level to extract
     PIL_img = {}
     location = (0,0)
-    level = 7
+    level = 5
     for img_name in OpSl_img:
         img = OpSl_img[img_name]
         size = img.level_dimensions[level]
         temp_PIL_img = img.read_region(location, level, size)
-        temp_PIL_img.save('img.png')
-        temp_PIL_img.show()
+        if one : temp_PIL_img.save(img_name+'.png')
+        #temp_PIL_img.show()
         img.close() # close image
         PIL_img[img_name] = temp_PIL_img
         
@@ -98,10 +100,11 @@ def xml_to_vertices(xml, region_type = '0'):
         
     return V_coord
 
-def vertices_to_mask(img_shape, ds_rate, V_coord):
-    mask = np.ones(img_shape) # creates an array of ones of the same shape of our image
-    #ds_rate = 8 # downsample rate
-
+def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
+    # create an array of ones of the same shape of our image
+    if png : mask = np.zeros((img_shape[0], img_shape[1], 3), dtype=np.uint8)
+    else : mask = np.ones(img_shape) 
+    	
     # list of polygons, each object is an array containing the coords of the px in a region of V_coord
     polygons = [] # 1 polygon / region
 
@@ -124,11 +127,19 @@ def vertices_to_mask(img_shape, ds_rate, V_coord):
         polygons.append(skimage.draw.polygon(x,y)) 
         
     # modify mask so that each px in a region of V_coord is set to 0
-    for p in range(len(polygons)):
-        poly = np.transpose(polygons[p])
+    if png :
+        for p in range(len(polygons)):
+            poly = np.transpose(polygons[p])
 
-        for i in range(len(poly)):
-            mask[(poly[i][0], poly[i][1])] = 0
+            for i in range(len(poly)):
+                #print((poly[i][1], poly[i][0]))
+                mask[(poly[i][1], poly[i][0])] = [255, 255, 255]
+    else :
+        for p in range(len(polygons)):
+            poly = np.transpose(polygons[p])
+
+            for i in range(len(poly)):
+                mask[(poly[i][0], poly[i][1])] = 0
         
     return mask
 
@@ -178,3 +189,20 @@ def load_annot(in_dir, img_dict):
         masks[img_name] = temp_mask
     
     return masks
+    
+    
+def png_mask(img_path, disp): # visualisation d'annotation pour une image
+    image = load_img(img_path, True)
+    annot_path = img_path.replace('ndpi', 'annotations')
+    xml = minidom.parse(annot_path)
+    coords = xml_to_vertices(xml, '0')
+    name = img_path.split('/')[-1].split('.')[0]
+    img_shape = image[name].shape
+    print(img_shape)
+    mask_img = vertices_to_mask(img_shape, 32, coords, True)
+    PILimg = PIL.Image.fromarray(mask_img, 'RGB')
+    fname = name + '_mask.png'
+    PILimg.save(fname)
+    if disp:
+        PILimg.show()
+    return PILimg
