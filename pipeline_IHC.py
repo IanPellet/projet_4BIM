@@ -5,7 +5,6 @@ More details.
 """
 
 
-
 # Images
 import os
 import PIL 
@@ -20,11 +19,11 @@ import skimage.draw
 def load_img(in_dir, one = False):
     """
     Load images and transform it to np.arrays to be inputed in the model
+
+    :param in_dir: string, directory containing the image files.
+    :param one: bool, True if :param in_dir: is the path to one image, default = False.
     
-    Parameters :
-        in_dir -> directory containing the image files (str)
-    Returned value :
-        img_as_array -> dict of images in in_dir represented as np.array of int, indexed by image's name (str)
+    :returns: dict of images in in_dir represented as np.array of int, indexed by image's name (str).
     """ 
     if one :
         img_paths = [in_dir]
@@ -73,11 +72,11 @@ def load_img(in_dir, one = False):
 def xml_to_vertices(xml, region_type = '0'):
     """
     Returns the list of coordinates of the vertices of each regions 
-    Parameters :
-        xml -> parsed xml file
-        region_type -> extract only positive '0' or negative regions '1'(str)
-    Returned value :
-        V_coord -> list of coordinates (dict) of all vertices in each region (2D array of dict)
+
+    :param xml: parsed xml file.
+    :param region_type: string, extract only positive '0' or negative regions '1'.
+    
+    :returns: list of coordinates (dict) of all vertices in each region (2D array of dict).
     """
     
     # extract positive regions
@@ -101,6 +100,18 @@ def xml_to_vertices(xml, region_type = '0'):
     return V_coord
 
 def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
+    """
+    Creates a mask with the same shape as :param img_shape: representing the region of :param V_coord: with 0 and the rest of the array with 1.
+    If :param png: is set to True, the created mask is an array of a RGB image with regions of :param V_coord: in white and the rest of the image in black.
+
+    :param img_shape: tuple, shape of the image corresponding to :param V_coord:.
+    :param ds_rate: int, down-sampling rate used to get an image of shape :param img_shape:.
+    :param V_coord: list of coordinates (dict) of all vertices in each region (2D array of dict).
+    :param pg: bool, True to generate a RGB image instead of a 0/1 array, default = False.
+    
+    :returns: int np.array, array representing the regions of :param V_coord:.
+    """
+
     # create an array of ones of the same shape of our image
     if png : mask = np.zeros((img_shape[0], img_shape[1], 3), dtype=np.uint8)
     else : mask = np.ones(img_shape) 
@@ -146,10 +157,10 @@ def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
 def load_annot(in_dir, img_dict):
     """
     Load annotation files and transform it to mask arrays to be inputed in the model
-    Parameters :
-        in_dir -> directory containing the annotation files (str)
-    Returned value :
-        mask_array -> dict of images in in_dir represented as np.array of int, indexed by image's name (str)
+  
+    :param in_dir: string, directory containing the annotation files.
+    
+    :returns: dict of images in in_dir represented as np.array of int, indexed by image's name (str).
     """ 
     
     # list of annotations paths
