@@ -140,7 +140,7 @@ def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
 
             for i in range(len(poly)):
                 mask[(poly[i][0], poly[i][1])] = 0
-        
+
     return mask
 
 def load_annot(in_dir, img_dict):
