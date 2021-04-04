@@ -191,14 +191,23 @@ def load_annot(in_dir, img_dict):
     return masks
     
     
-def png_mask(img_path, disp): # visualisation d'annotation pour une image
+def png_mask(img_path, disp = False): 
+    """
+    Visualise the annotation corresponding to an image as a black and white png mask file.
+    Saves the annotation and the image to png files.
+
+    :param img_path: string, path of the ndpi image.
+    :param disp: bool, True if you want to open the mask, default = False.
+
+    :returns: PIL image, the annotation as a black and white RGB image.
+    """
+
     image = load_img(img_path, True)
     annot_path = img_path.replace('ndpi', 'annotations')
     xml = minidom.parse(annot_path)
     coords = xml_to_vertices(xml, '0')
     name = img_path.split('/')[-1].split('.')[0]
     img_shape = image[name].shape
-    print(img_shape)
     mask_img = vertices_to_mask(img_shape, 32, coords, True)
     PILimg = PIL.Image.fromarray(mask_img, 'RGB')
     fname = name + '_mask.png'
