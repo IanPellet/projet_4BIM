@@ -47,6 +47,14 @@ class Test_TrainingSet_imprort(unittest.TestCase):
 		for img in loaded_masks:
 			self.assertEqual(loaded[img].shape, loaded_masks[img].shape) # mask and img of the same shape
 
+		# wrong directory name
+		with self.assertRaises(FileNotFoundError): 
+			pipe.load_img("./test_data/datu/")
+
+		# no image passed
+		loaded_masks = pipe.load_annot(input_dir, [])
+		self.assertEqual(len(loaded_masks), 0)
+
 	def test_png_mask(self):
 		img_path = "./test_data/test_png/CRC1.ndpi" # path of the image
 		img_file = img_path.split('/').pop(-1) # mane of the file
