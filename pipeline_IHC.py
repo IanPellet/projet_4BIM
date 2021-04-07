@@ -25,6 +25,10 @@ def load_img(in_dir, one = False):
     
     :returns: dict of images in in_dir represented as np.array of int, indexed by image's name (str).
     """ 
+
+    if not os.path.exists(in_dir):
+        raise FileNotFoundError("The directory doesn't exist")
+
     if one :
         img_paths = [in_dir]
     else:
@@ -99,7 +103,7 @@ def xml_to_vertices(xml, region_type = '0'):
         
     return V_coord
 
-def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
+def vertices_to_mask(img_shape, ds_rate, V_coord, png = False, img = []):
     """
     Creates a mask with the same shape as :param img_shape: representing the region of :param V_coord: with 0 and the rest of the array with 1.
     If :param png: is set to True, the created mask is an array of a RGB image with regions of :param V_coord: in white and the rest of the image in black.
@@ -143,8 +147,8 @@ def vertices_to_mask(img_shape, ds_rate, V_coord, png = False):
             poly = np.transpose(polygons[p])
 
             for i in range(len(poly)):
-                #print((poly[i][1], poly[i][0]))
-                mask[(poly[i][1], poly[i][0])] = [255, 255, 255]
+                #mask[(poly[i][1], poly[i][0])] = [255, 255, 255]
+                mask[(poly[i][1], poly[i][0])] = img[poly[i][1]][poly[i][0]][0:3]
     else :
         for p in range(len(polygons)):
             poly = np.transpose(polygons[p])
@@ -162,6 +166,8 @@ def load_annot(in_dir, img_dict):
     
     :returns: dict of images in in_dir represented as np.array of int, indexed by image's name (str).
     """ 
+    if not os.path.exists(in_dir):
+        raise FileNotFoundError("The directory doesn't exist")
     
     # list of annotations paths
     annot_paths = sorted(
@@ -219,7 +225,7 @@ def png_mask(img_path, disp = False):
     coords = xml_to_vertices(xml, '0')
     name = img_path.split('/')[-1].split('.')[0]
     img_shape = image[name].shape
-    mask_img = vertices_to_mask(img_shape, 32, coords, True)
+    mask_img = vertices_to_mask(img_shape, 32, coords, True, image[name])
     PILimg = PIL.Image.fromarray(mask_img, 'RGB')
     fname = name + '_mask.png'
     PILimg.save(fname)
